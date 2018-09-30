@@ -34,7 +34,8 @@ Todo.findOne({
     });
 
 
-Todo.findById(id).then((todo) => {
+Todo.findById(id)
+.then((todo) => {
         if (!todo) {
             return console.log('id not found!');
         }
