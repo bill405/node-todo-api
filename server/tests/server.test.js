@@ -25,7 +25,7 @@ const todos = [{
         _id: new ObjectID(),
         text: 'Fourth test todo'
     }
-]
+];
 
 beforeEach((done) => {
     Todo.remove({}).then(() => {
