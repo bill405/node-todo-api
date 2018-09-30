@@ -5,17 +5,9 @@ const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 const _ = require('lodash');
 
- 
-
-let {
-    mongoose
-} = require('./db/mongoose');
-let {
-    Todo
-} = require('./models/todo');
-let {
-    User
-} = require('./models/user');
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo');
+const {User} = require('./models/user');
 
 var app = express();
 const port = process.env.PORT;
@@ -57,7 +49,9 @@ app.get('/todos/:id', (req, res) => {
                 return res.status(404).send();
             }
             //send todo as an object {todo} is equal to {todo:todo} in es6
-            return res.status(200).send({todo});
+            return res.status(200).send({
+                todo
+            });
         })
         .catch(e => res.status(400).send());
 });
@@ -65,44 +59,69 @@ app.get('/todos/:id', (req, res) => {
 app.delete('/todos/:id', (req, res) => {
     let id = req.params.id;
 
-    if(!ObjectID.isValid(id)) {
+    if (!ObjectID.isValid(id)) {
         return res.status(404).send();
     }
     Todo.findByIdAndDelete(id)
-    .then(todo => {
-        if(!todo) {
-            return res.status(404).send();
-        }
-        res.status(200).send({todo});
-    })
-    .catch(e => res.status(400).send());
+        .then(todo => {
+            if (!todo) {
+                return res.status(404).send();
+            }
+            res.status(200).send({
+                todo
+            });
+        })
+        .catch(e => res.status(400).send());
 });
 
 app.patch(`/todos/:id`, (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['text', 'completed']);
 
-    if(!ObjectID.isValid(id)) {
+    if (!ObjectID.isValid(id)) {
         return res.status(404).send();
     }
 
-    if(_.isBoolean(body.completed) && body.completed) {
+    if (_.isBoolean(body.completed) && body.completed) {
         body.completedAt = new Date().getTime();
     } else {
         body.completed = false;
         body.completedAt = null;
     }
 
-    Todo.findOneAndUpdate(id, {$set: body}, {new: true})
+    Todo.findOneAndUpdate(id, {
+            $set: body
+        }, {
+            new: true
+        })
         .then(todo => {
-            if(!todo) {
+            if (!todo) {
                 return res.status(404).send();
             }
-            res.send({todo});
+            res.send({
+                todo
+            });
         })
         .catch(e => res.status(400).send());
 
 })
+
+//signup method
+app.post('/user', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    let user =  new User(body);
+
+    user.save().then(() => {
+        console.log('STEP 2:', user)
+        let myUser = user.generateAuthToken();
+        return myUser
+    })
+    .then((token) => {        
+        res.header('x-auth', token).send(user);
+    })
+    .catch(err => res.status(400).send());
+});
+    
 
 app.listen(port, (err, res) => {
     if (err) {
@@ -114,3 +133,8 @@ app.listen(port, (err, res) => {
 module.exports = {
     app
 };
+
+//model methods: called on the User
+    //do not require an indivdual document. Ex findByToken does not exist in moongose. We will create this. 
+//instance methods: called on individual user 
+    // generate auth token is an instance method
