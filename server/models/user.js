@@ -56,6 +56,24 @@ UserSchema.methods.generateAuthToken = function() {
     });
 };
 
+//note this is a model method, so it is static, since it is static
+UserSchema.statics.findByToken = function(token) {
+    //since this method is unrelated to a user, we use U 
+    let User = this;
+    let decoded;
+
+    try {
+        decoded = jwt.verify(token, 'abc123');
+    } catch (error) {
+        return Promise.reject();
+    }
+    return User.findOne({
+        '_id': decoded._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
+    });
+};
+
 let User = mongoose.model('User', UserSchema);
 
 module.exports = {User}
