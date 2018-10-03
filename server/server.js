@@ -113,7 +113,6 @@ app.post('/user', (req, res) => {
     let user =  new User(body);
 
     user.save().then(() => {
-        console.log('STEP 2:', user)
         let myUser = user.generateAuthToken();
         return myUser
     })

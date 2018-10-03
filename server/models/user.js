@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 let UserSchema = new mongoose.Schema({
     email: {
@@ -73,6 +74,31 @@ UserSchema.statics.findByToken = function(token) {
         'tokens.access': 'auth'
     });
 };
+
+//Mongoose middleware that hashes the password before it is stored
+//https://mongoosejs.com/docs/middleware.html
+UserSchema.pre('save', function (next) {
+    let user = this;
+
+    //don't hash your hash
+    //is modified returns true if modified 
+    //if the password was modified, we want to call our bycrpt hash
+    if (user.isModified('password')) {
+        bcrypt.genSalt(10, (err, salt) => {
+            if (err) console.log(err);
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                user.password = hash;
+                console.log(user.password);
+                next();
+            });
+        });
+
+    } else {
+        console.log('password was not modified');
+        next();
+    }
+});
+
 
 let User = mongoose.model('User', UserSchema);
 
