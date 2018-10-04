@@ -50,8 +50,6 @@ UserSchema.methods.generateAuthToken = function() {
     let token = jwt.sign({_id: userHex, access}, 'abc123').toString();
     
     user.tokens = user.tokens.concat([{access, token}]);
-    console.log(JSON.stringify(user, undefined, 2));
-    
     return user.save().then(() => {
         return token;
     });
@@ -88,13 +86,11 @@ UserSchema.pre('save', function (next) {
             if (err) console.log(err);
             bcrypt.hash(user.password, salt, (err, hash) => {
                 user.password = hash;
-                console.log(user.password);
                 next();
             });
         });
 
     } else {
-        console.log('password was not modified');
         next();
     }
 });
