@@ -24,6 +24,7 @@ bcrypt.compare(password, hashedPassword, (err, res) => {
 /* 
 let data = {
     id: 10
+    
 }
  */
 

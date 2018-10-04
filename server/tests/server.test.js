@@ -230,7 +230,6 @@ describe('POST /users', () => {
     });
     
     it('should not create user if email in use', (done) => {
-            
         request(app)
         .post('/user')
         .send({

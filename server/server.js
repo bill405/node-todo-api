@@ -125,6 +125,20 @@ app.post('/user', (req, res) => {
 app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user);
 });
+
+app.post('/users/login', (req, res) => {
+    let body = _.pick((req.body), ['email', 'password']);
+
+    User.findByCredentials(body.email, body.password)
+        .then((user) => {
+            user.generateAuthToken().then((token)=> {
+                res.header('x-auth', token).send(user);
+            });
+        })
+        .catch((err) => {
+            res.status(400).send();
+        });
+});
     
 
 app.listen(port, (err, res) => {
@@ -137,6 +151,8 @@ app.listen(port, (err, res) => {
 module.exports = {
     app
 };
+
+
 
 //model methods: called on the User
     //do not require an indivdual document. Ex findByToken does not exist in moongose. We will create this. 

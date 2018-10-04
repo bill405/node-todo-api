@@ -73,6 +73,28 @@ UserSchema.statics.findByToken = function(token) {
     });
 };
 
+UserSchema.statics.findByCredentials = function(email, password) {
+    let User = this;
+
+    return User.findOne({email}).then((user) => {
+        if(!user) {
+            return Promise.reject();
+        };
+
+        return new Promise((resolve, reject) => {
+            bcrypt.compare(password, user.password, (err, res) => {
+                //returns true or false if the password is the same or different
+                if(res) {
+                    resolve(user);
+                } else {
+                    reject();
+                }
+            });
+             
+        });
+    });
+};
+
 //Mongoose middleware that hashes the password before it is stored
 //https://mongoosejs.com/docs/middleware.html
 UserSchema.pre('save', function (next) {
